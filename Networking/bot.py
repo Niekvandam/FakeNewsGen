@@ -2,7 +2,6 @@
 import sys
 import numpy
 import os
-os.environ["CUDA_VISIBLE_DEVICES"]=""
 import tensorflow as tf
 from keras.models import Sequential
 from keras.layers import Dense
@@ -11,7 +10,7 @@ from keras.layers import LSTM
 from keras.callbacks import ModelCheckpoint
 from keras.utils import np_utils
 # load ascii text and covert to lowercase
-filename = "phineasandferbtranscript.txt"
+filename = "formattedtrumptweets.txt"
 raw_text = open(filename, 'r', encoding='utf-8').read()
 raw_text = raw_text.lower()
 # create mapping of unique chars to integers, and a reverse mapping
@@ -46,9 +45,10 @@ model = Sequential()
 model.add(LSTM(256, input_shape=(X.shape[1], X.shape[2]), return_sequences=True))
 model.add(Dropout(0.2))
 model.add(LSTM(256))
+model.add(Dense(0.2))
 model.add(Dense(y.shape[1], activation='softmax'))
 # load the network weights
-filename = "phineas-and-ferb-trained.hdf5"
+filename = "weights-improvement-25-1.6513-bigger.hdf5"
 model.load_weights(filename)
 model.compile(loss='categorical_crossentropy', optimizer='adam')
 # pick a random seed
@@ -58,7 +58,7 @@ print("Seed:")
 print("\"", ''.join([int_to_char[value] for value in pattern]), "\"")
 # generate characters
 
-for i in range(40000):
+for i in range(241):
 	x = numpy.reshape(pattern, (1, len(pattern), 1))
 	x = x / float(n_vocab)
 	prediction = model.predict(x, verbose=0)
