@@ -50,6 +50,7 @@ def create_model(predictors, label, max_sequence_len, total_words):
     model.add(Dropout(0.2))
     model.add(LSTM(100))
     model.add(Dense(total_words, activation='softmax'))
+    model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
     # define the checkpoint
     filepath = "weights-improvement-{epoch:02d}-{loss:.4f}-bigger.hdf5"
     checkpoint = ModelCheckpoint(filepath, monitor='loss', verbose=1, save_best_only=True, mode='min')
