@@ -1,5 +1,3 @@
-import random
-
 from keras.preprocessing.sequence import pad_sequences
 from keras.layers import Embedding, LSTM, Dense
 from keras.preprocessing.text import Tokenizer
@@ -75,15 +73,9 @@ def generate_text(seed_text, next_words, max_sequence_len):
         seed_text += " " + output_word
     return seed_text
 
-def generate_seed():
-    lines = open('formattedtrumptweets.txt').read().splitlines()
-    return random.choice(lines)
 
 data = open('formattedtrumptweets.txt', 'r', encoding='utf-8').read()
 predictors, label, max_sequence_len, total_words = dataset_preparation(data)
-model = Sequential()
-model.load_weights("output.hdf5")
-model.compile(loss='categorical_crossentropy', optimizer='adam')
-text = generate_text("we naughty", 3, max_sequence_len)
+model = create_model(predictors, label, max_sequence_len, total_words)
 
 
