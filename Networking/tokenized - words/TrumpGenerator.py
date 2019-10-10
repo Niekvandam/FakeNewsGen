@@ -45,45 +45,40 @@ def dataset_preparation(data):
     return predictors, label, max_sequence_len, total_words
 
 
-def create_model(predictors, label, max_sequence_len, total_words):
+def create_model(max_sequence_len, total_words):
     model = Sequential()
     model.add(Embedding(total_words, 10, input_length=max_sequence_len - 1))
     model.add(LSTM(150, return_sequences=True))
     model.add(Dropout(0.2))
     model.add(LSTM(100))
     model.add(Dense(total_words, activation='softmax'))
-    # define the checkpoint
-    filepath = "weights-improvement-{epoch:02d}-{loss:.4f}-bigger.hdf5"
-    checkpoint = ModelCheckpoint(filepath, monitor='loss', verbose=1, save_best_only=True, mode='min')
-    callbacks_list = [checkpoint]
-    model.fit(predictors, label, epochs=100, verbose=1, callbacks=[checkpoint])
-    print(model.summary())
+    model.load_weights("weights-improvement-01-6.6703-bigger.hdf5")
+    model.compile(loss='categorical_crossentropy', optimizer='adam')
     return model
 
 
 def generate_text(seed_text, next_words, max_sequence_len):
+    trump_tweet = ""
     for _ in range(next_words):
         token_list = tokenizer.texts_to_sequences([seed_text])[0]
         token_list = pad_sequences([token_list], maxlen=max_sequence_len - 1, padding='pre')
         predicted = model.predict_classes(token_list, verbose=0)
-
         output_word = ""
         for word, index in tokenizer.word_index.items():
             if index == predicted:
                 output_word = word
                 break
         seed_text += " " + output_word
-    return seed_text
+        trump_tweet += " " + output_word
+    return trump_tweet
 
 def generate_seed():
-    lines = open('formattedtrumptweets.txt').read().splitlines()
+    lines = open('formattedtrumptweets.txt', encoding='utf-8').read().splitlines()
     return random.choice(lines)
 
 data = open('formattedtrumptweets.txt', 'r', encoding='utf-8').read()
 predictors, label, max_sequence_len, total_words = dataset_preparation(data)
-model = Sequential()
-model.load_weights("output.hdf5")
-model.compile(loss='categorical_crossentropy', optimizer='adam')
-text = generate_text("we naughty", 3, max_sequence_len)
-
+model = create_model(max_sequence_len, total_words)
+text = generate_text(generate_seed(), 50, max_sequence_len)
+print(text)
 
