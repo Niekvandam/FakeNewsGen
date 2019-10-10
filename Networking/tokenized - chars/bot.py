@@ -9,6 +9,12 @@ from keras.layers import Dropout
 from keras.layers import LSTM
 from keras.callbacks import ModelCheckpoint
 from keras.utils import np_utils
+import tweepy
+consumer_api = "tRv3Xvjq0iPhgAcTPxgV1k5Zb"
+consumer_secret = "o3QQTLvEfxp2sRKdDSuLp55y7kp732qsEh0n386v7NgmzeSDnP"
+oauth_access_token = "1181490025474736129-Ro305TR554rhxCuuV76PxWerNzogv9"
+oatuh_access_token_secret = "uIJtd0rixGkYVj6YIvXeZPXjhGy1cc6heBK71NZ6g2ht9"
+
 # load ascii text and covert to lowercase
 filename = "formattedtrumptweets.txt"
 raw_text = open(filename, 'r', encoding='utf-8').read()
@@ -45,10 +51,10 @@ model = Sequential()
 model.add(LSTM(256, input_shape=(X.shape[1], X.shape[2]), return_sequences=True))
 model.add(Dropout(0.2))
 model.add(LSTM(256))
-model.add(Dense(0.2))
+model.add(Dropout(0.2))
 model.add(Dense(y.shape[1], activation='softmax'))
 # load the network weights
-filename = "output.hdf5"
+filename = "weights-improvement-57-1.5145-bigger.hdf5"
 model.load_weights(filename)
 model.compile(loss='categorical_crossentropy', optimizer='adam')
 # pick a random seed
