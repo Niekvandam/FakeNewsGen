@@ -1,5 +1,9 @@
 import random
+import re
+import time
 
+import pyttsx3 as pyttsx
+import tweepy as tw
 from keras.preprocessing.sequence import pad_sequences
 from keras.layers import Embedding, LSTM, Dense
 from keras.preprocessing.text import Tokenizer
@@ -14,8 +18,7 @@ from keras.callbacks import EarlyStopping
 from keras.models import Sequential
 import keras.utils as ku
 import numpy as np
-
-tokenizer = Tokenizer()
+tokenizer = Tokenizer(filters='\t')
 
 
 def dataset_preparation(data):
@@ -45,19 +48,15 @@ def dataset_preparation(data):
     return predictors, label, max_sequence_len, total_words
 
 
-def create_model(predictors, label, max_sequence_len, total_words):
+def create_model(max_sequence_len, total_words):
     model = Sequential()
     model.add(Embedding(total_words, 10, input_length=max_sequence_len - 1))
     model.add(LSTM(150, return_sequences=True))
-    model.add(Dropout(0.2))
+    model.add(Dropout(0.0001))
     model.add(LSTM(100))
     model.add(Dense(total_words, activation='softmax'))
-    # define the checkpoint
-    filepath = "weights-improvement-{epoch:02d}-{loss:.4f}-bigger.hdf5"
-    checkpoint = ModelCheckpoint(filepath, monitor='loss', verbose=1, save_best_only=True, mode='min')
-    callbacks_list = [checkpoint]
-    model.fit(predictors, label, epochs=100, verbose=1, callbacks=[checkpoint])
-    print(model.summary())
+    model.load_weights("weights-improvement-74-2.9662-bigger.hdf5")
+    model.compile(loss='categorical_crossentropy', optimizer='adam')
     return model
 
 
@@ -66,7 +65,6 @@ def generate_text(seed_text, next_words, max_sequence_len):
         token_list = tokenizer.texts_to_sequences([seed_text])[0]
         token_list = pad_sequences([token_list], maxlen=max_sequence_len - 1, padding='pre')
         predicted = model.predict_classes(token_list, verbose=0)
-
         output_word = ""
         for word, index in tokenizer.word_index.items():
             if index == predicted:
@@ -75,15 +73,50 @@ def generate_text(seed_text, next_words, max_sequence_len):
         seed_text += " " + output_word
     return seed_text
 
+
 def generate_seed():
-    lines = open('formattedtrumptweets.txt').read().splitlines()
-    return random.choice(lines)
+    lines = open('formattedtrumptweets.txt', encoding='utf-8').read().splitlines()
+    words = random.choice(lines).split()
+    seed = random.choice(words)
+    if("https" in seed):
+        seed = generate_seed()
+    print("seed is:\t" + seed)
+    return seed
+
+def validate_tweet(tweet):
+    while len(tweet) > 240:
+       tweet = tweet[0:max(tweet.rfind(i) for i in "!.?)]}")]
+    return tweet
+
+consumer_key = "tRv3Xvjq0iPhgAcTPxgV1k5Zb"
+consumer_secret = "o3QQTLvEfxp2sRKdDSuLp55y7kp732qsEh0n386v7NgmzeSDnP"
+access_token = "1181490025474736129-Ro305TR554rhxCuuV76PxWerNzogv9"
+access_token_secret = "uIJtd0rixGkYVj6YIvXeZPXjhGy1cc6heBK71NZ6g2ht9"
+
+
+def post_tweet():
+    auth = tw.OAuthHandler(consumer_key, consumer_secret)
+    auth.set_access_token(access_token, access_token_secret)
+    api = tw.API(auth, wait_on_rate_limit=True)
+    tweetlength = random.randrange(6,100)
+    result = generate_text(generate_seed(), tweetlength, max_sequence_len)
+    text = re.sub(r"http\S+", "", result)
+    text = validate_tweet(text)
+    print(text)
+    # engine = pyttsx.init()
+    # engine.say(text)
+    # engine.runAndWait()
+    api.update_status(text)
+
 
 data = open('formattedtrumptweets.txt', 'r', encoding='utf-8').read()
 predictors, label, max_sequence_len, total_words = dataset_preparation(data)
-model = Sequential()
-model.load_weights("output.hdf5")
-model.compile(loss='categorical_crossentropy', optimizer='adam')
-text = generate_text("we naughty", 3, max_sequence_len)
+model = create_model(max_sequence_len, total_words)
 
+while True:
+    try:
+        post_tweet()
+    except tw.error.TweepError:
+        print(tw.error.TweepError)
+    time.sleep(1 * 60)
 

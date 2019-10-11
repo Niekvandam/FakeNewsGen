@@ -13,7 +13,7 @@ from keras.models import Sequential
 import keras.utils as ku
 import numpy as np
 
-tokenizer = Tokenizer()
+tokenizer = Tokenizer(filters='\t')
 
 
 def dataset_preparation(data):
