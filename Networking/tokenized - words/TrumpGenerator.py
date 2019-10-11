@@ -120,5 +120,5 @@ while True:
         post_tweet()
     except tw.error.TweepError:
         print(tw.error.TweepError)
-    sleepminutes = random.randrange(1,60)
+    sleepminutes = random.randrange(1,120)
     time.sleep(sleepminutes * 60)
