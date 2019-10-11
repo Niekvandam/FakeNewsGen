@@ -55,7 +55,7 @@ def create_model(max_sequence_len, total_words):
     model.add(Dropout(0.0001))
     model.add(LSTM(100))
     model.add(Dense(total_words, activation='softmax'))
-    model.load_weights("weights-improvement-74-2.9662-bigger.hdf5")
+    model.load_weights("weights-improvement-83-2.8994-bigger.hdf5")
     model.compile(loss='categorical_crossentropy', optimizer='adam')
     return model
 
