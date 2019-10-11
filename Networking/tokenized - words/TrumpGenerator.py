@@ -77,6 +77,8 @@ def generate_text(seed_text, next_words, max_sequence_len):
 def generate_seed():
     lines = open('formattedtrumptweets.txt', encoding='utf-8').read().splitlines()
     words = random.choice(lines).split()
+    if(words == None):
+        words = random.choice(lines).split()
     seed = random.choice(words)
     if("https" in seed):
         seed = generate_seed()
@@ -118,5 +120,6 @@ while True:
         post_tweet()
     except tw.error.TweepError:
         print(tw.error.TweepError)
-    time.sleep(1 * 60)
+    sleepminutes = random.randrange(1,60)
+    time.sleep(sleepminutes * 60)
 
