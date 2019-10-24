@@ -55,7 +55,7 @@ def create_model(max_sequence_len, total_words):
     model.add(Dropout(0.0001))
     model.add(LSTM(100))
     model.add(Dense(total_words, activation='softmax'))
-    model.load_weights("weights-improvement-74-2.9662-bigger.hdf5")
+    model.load_weights("weights-improvement-83-2.8994-bigger.hdf5")
     model.compile(loss='categorical_crossentropy', optimizer='adam')
     return model
 
@@ -90,11 +90,6 @@ def validate_tweet(tweet):
        tweet = tweet[0:max(tweet.rfind(i) for i in "!.?)]}")]
     return tweet
 
-consumer_key = "tRv3Xvjq0iPhgAcTPxgV1k5Zb"
-consumer_secret = "o3QQTLvEfxp2sRKdDSuLp55y7kp732qsEh0n386v7NgmzeSDnP"
-access_token = "1181490025474736129-Ro305TR554rhxCuuV76PxWerNzogv9"
-access_token_secret = "uIJtd0rixGkYVj6YIvXeZPXjhGy1cc6heBK71NZ6g2ht9"
-
 
 def post_tweet():
     auth = tw.OAuthHandler(consumer_key, consumer_secret)
@@ -110,6 +105,11 @@ def post_tweet():
     # engine.runAndWait()
     api.update_status(text)
 
+consumer_key = "tRv3Xvjq0iPhgAcTPxgV1k5Zb"
+consumer_secret = "o3QQTLvEfxp2sRKdDSuLp55y7kp732qsEh0n386v7NgmzeSDnP"
+access_token = "1181490025474736129-Ro305TR554rhxCuuV76PxWerNzogv9"
+access_token_secret = "uIJtd0rixGkYVj6YIvXeZPXjhGy1cc6heBK71NZ6g2ht9"
+
 
 data = open('formattedtrumptweets.txt', 'r', encoding='utf-8').read()
 predictors, label, max_sequence_len, total_words = dataset_preparation(data)
@@ -120,6 +120,5 @@ while True:
         post_tweet()
     except tw.error.TweepError:
         print(tw.error.TweepError)
-    sleepminutes = random.randrange(1,60)
+    sleepminutes = random.randrange(1,120)
     time.sleep(sleepminutes * 60)
-
